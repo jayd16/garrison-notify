@@ -1,0 +1,5 @@
+﻿## Interface: 60000
+## Title: GarrisonNotify
+## Notes: Notfies of completed missions
+## SavedVariablesPerCharacter: InProgressMissionData
+GarrisonNotify.lua
