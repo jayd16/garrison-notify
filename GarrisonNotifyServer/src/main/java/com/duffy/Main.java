@@ -45,10 +45,45 @@ public class Main {
     public static void main(String[] args) throws IOException, InterruptedException {
         System.out.println("Hello World!");
 
-        grabMissionData();
+        //grabMissionData();
 
+//        // get the directory we want to watch, using the Paths singleton class
+//        Path toWatch = Paths.get(getAccountPath().toURI());
+//        if (toWatch == null) {
+//            throw new UnsupportedOperationException("Directory not found");
+//        }
+//
+//        // make a new watch service that we can register interest in
+//        // directories and files with.
+//        WatchService myWatcher = toWatch.getFileSystem().newWatchService();
+//
+//        // start the file watcher thread below
+//        MyWatchQueueReader fileWatcher = new MyWatchQueueReader(myWatcher);
+//        Thread th = new Thread(fileWatcher, "FileWatcher");
+//        th.start();
+//
+//        // register a file
+//        toWatch.register(myWatcher, ENTRY_CREATE, ENTRY_MODIFY);
+//        th.join();
+
+        List<Thread> watcherThreads = new ArrayList<>();
+
+        for(File f : getCharacterPaths()){
+            File savedVars = new File(f, "/SavedVariables");
+            if(savedVars.exists()) {
+                watcherThreads.add(addWatcherToDirectories(savedVars));
+            }
+        }
+
+        for(Thread t : watcherThreads){
+            t.join();
+        }
+
+    }
+
+    private static Thread addWatcherToDirectories(File file) throws IOException{
         // get the directory we want to watch, using the Paths singleton class
-        Path toWatch = Paths.get(getAccountPath().toURI());
+        Path toWatch = Paths.get(file.toURI());
         if (toWatch == null) {
             throw new UnsupportedOperationException("Directory not found");
         }
@@ -64,9 +99,7 @@ public class Main {
 
         // register a file
         toWatch.register(myWatcher, ENTRY_CREATE, ENTRY_MODIFY);
-        th.join();
-
-
+        return th;
     }
 
 
