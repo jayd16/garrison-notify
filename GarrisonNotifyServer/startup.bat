@@ -1,1 +1,1 @@
-java -jar .\target\garrison.notify-1.0-SNAPSHOT-jar-with-dependencies.jar
+powershell ".\target\garrison.notify-1.0-SNAPSHOT-jar-with-dependencies.jar"
