@@ -1,6 +1,7 @@
 package johnduffy.garrisonnotify;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -64,6 +65,10 @@ public class MainActivity extends ActionBarActivity {
 
             if (regid.isEmpty()) {
                 registerInBackground();
+            }else {
+                Log.d("PUSH", regid);
+                startActivity(new Intent(this, InProgressMissionsActivity.class));
+                finish();
             }
         } else {
             Log.i(TAG, "No valid Google Play Services APK found.");

@@ -1,9 +1,16 @@
 package com.duffy;
 
 import com.duffy.model.Account;
+import com.duffy.model.BlizzardApiItem;
+import com.duffy.model.GarrisonMission;
 import com.duffy.model.InProgressMissionData;
 import com.duffy.model.push.InProgressMissionDataPushRequest;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectReader;
+import com.fasterxml.jackson.jaxrs.annotation.JacksonFeatures;
 import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
+import com.fasterxml.jackson.jaxrs.json.JsonMapperConfigurator;
 import com.google.gson.Gson;
 import org.apache.commons.io.IOUtils;
 
@@ -25,7 +32,15 @@ import static java.nio.file.StandardWatchEventKinds.ENTRY_MODIFY;
  */
 public class Main {
 
-    private static final File BASE_WOW_PATH = new File("C:\\Program Files (x86)\\World of Warcraft");
+    private static final File BASE_WOW_PATH = new File("G:\\Program Files (x86)\\World of Warcraft");
+
+    private static Client client = ClientBuilder.newClient();
+
+    static {
+        JacksonJsonProvider provider = new JacksonJsonProvider();
+        provider.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        client.register(provider);
+    }
 
     public static void main(String[] args) throws IOException, InterruptedException {
         System.out.println("Hello World!");
@@ -58,24 +73,27 @@ public class Main {
     private static File getAccountPath() {
         return new File(BASE_WOW_PATH, "/WTF/Account/JAYD1616/Silvermoon/");
     }
-    private static File[] getCharacterPaths(){
-       return getAccountPath().listFiles();
+
+    private static File[] getCharacterPaths() {
+        return getAccountPath().listFiles();
     }
 
-    private static void grabMissionData() throws IOException{
+    private static void grabMissionData() throws IOException {
         List<Account> accounts = new ArrayList<>();
 
-        for(File f : getCharacterPaths()){
+        for (File f : getCharacterPaths()) {
             InProgressMissionData data = grabMissionData(new File(f, "/SavedVariables/GarrisonNotify.lua"));
-            accounts.add(new Account(f.getName(), data));
+            if (data != null) {
+                accounts.add(new Account(f.getName(), data));
+            }
         }
 
-        //push(accounts);
+        push(accounts);
     }
 
     private static InProgressMissionData grabMissionData(File garrisonSavedFile) throws IOException {
 
-        if(!garrisonSavedFile.exists() || !garrisonSavedFile.canRead()) return null;
+        if (!garrisonSavedFile.exists() || !garrisonSavedFile.canRead()) return null;
 
         try (InputStream is = new FileInputStream(garrisonSavedFile)) {
             String s = IOUtils.toString(is)
@@ -87,21 +105,50 @@ public class Main {
                     .replace(",}", "}");
             System.out.println(s);
             Gson gson = new Gson();
-            return gson.fromJson(s, InProgressMissionData.class);
+            InProgressMissionData missionData = gson.fromJson(s, InProgressMissionData.class);
+
+            preProcessRewards(missionData);
+
+            return missionData;
         }
     }
 
-    private static void push(List<Account> accounts){
-        InProgressMissionDataPushRequest pushRequest = new InProgressMissionDataPushRequest(accounts, "APA91bHcf7nVHXqYoe2J9WOaE3KfJxSs_b5Hua_vRNlG-o8UHsfVAwyeWnmGmEP_zdExqpm2sn8D5KFYLXh_hbvBUSs_VTQDQ2FHKSIV5AMMKaaRbj6Z5PPRDeKz_bs1CCdbATbQhk4d6VAkD8fK7GBw7N7ZS6q8M8gPN3Rs713LM8GyhQJk3GQ");
+    private static void preProcessRewards(InProgressMissionData missionData) {
+        for (GarrisonMission m : missionData.values()) {
+            for (GarrisonMission.Reward reward : m.rewards.values()) {
 
-        Client client = ClientBuilder.newClient();
-        client.register(JacksonJsonProvider.class);
+                if(reward.followerXP != null){
+                    reward.quantity = reward.followerXP;
+                }
+
+                if(reward.icon != null && reward.icon.equals(GarrisonMission.Reward.FOLLOWER_XP_ICON)) {
+                    //wat do?
+                } else if (reward.icon != null) {
+                    reward.imageUrl = "http://media.blizzard.com/wow/icons/56/" + reward.icon.substring(16) + ".jpg"; //remove "Interface\Icons\"
+                } else {
+                    BlizzardApiItem blizzardApiItem = client.target("http://us.battle.net/api/wow/item/" + reward.itemID).request().get(BlizzardApiItem.class);
+                    reward.imageUrl = "http://media.blizzard.com/wow/icons/56/" + blizzardApiItem.icon + ".jpg";
+                    reward.quantity = blizzardApiItem.itemLevel;
+                }
+            }
+        }
+    }
+
+    private static void push(List<Account> accounts) {
+        InProgressMissionDataPushRequest pushRequest = new InProgressMissionDataPushRequest(accounts, "APA91bGIQ2SrCkgRbkkQdwn3xjK6X3He2T-G7gI7e0ByrdNAvuGRBvZ_fLiy0Yqc_bmXRgK-ma2YOlX_sM43iqTSuonveDJaKKwI7deHMC2ofRvCN8lwOy-sfAp69jhwT39j80VWz6bTPmkgk676CY1fPynrgr04s84jJD7_HlgeQ1U402VLjrE");
+
+
         Response response = client.target("https://android.googleapis.com/gcm/send")
                 .request()
                 .header("Authorization", "key=AIzaSyDE2DwkQmxljaDTSsbq_NYMCQaNj1_lx6E")
                 .post(Entity.entity(pushRequest, MediaType.APPLICATION_JSON));
 
         System.out.println("push response: " + response.getStatus());
+        try {
+            System.out.println("push response: " + IOUtils.toString((InputStream) response.getEntity()));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private static class MyWatchQueueReader implements Runnable {

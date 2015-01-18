@@ -11,6 +11,15 @@ import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
 import com.google.android.gms.gcm.GoogleCloudMessaging;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
+import java.util.List;
+
+import johnduffy.garrisonnotify.event.MissionUpdates;
+import johnduffy.garrisonnotify.model.Account;
+import johnduffy.garrisonnotify.model.InProgressMissionData;
+import johnduffy.garrisonnotify.persistence.MissionUtil;
 
 public class GcmIntentService extends IntentService {
     public static final int NOTIFICATION_ID = 1;
@@ -52,6 +61,9 @@ public class GcmIntentService extends IntentService {
                 // Post notification of received message.
                 sendNotification("Received: " + extras.toString());
                 Log.i(TAG, "Received: " + extras.toString());
+
+                parseAndStoreMission(extras);
+
             }
         }
         // Release the wake lock provided by the WakefulBroadcastReceiver.
@@ -72,12 +84,19 @@ public class GcmIntentService extends IntentService {
                 new NotificationCompat.Builder(this)
                         .setSmallIcon(R.drawable.ic_launcher)
                         .setContentTitle("GCM Notification")
-                        .setStyle(new NotificationCompat.BigTextStyle()
-
-                                .bigText(msg))
+                        .setStyle(
+                                new NotificationCompat
+                                        .BigTextStyle()
+                                        .bigText(msg))
                         .setContentText(msg);
 
         mBuilder.setContentIntent(contentIntent);
         mNotificationManager.notify(NOTIFICATION_ID, mBuilder.build());
+    }
+
+    private void parseAndStoreMission(Bundle notifExtras) {
+        String data = notifExtras.getString("data");
+        MissionUtil.setMissions(this, data);
+        MissionUpdates.sendBroadcast(this);
     }
 }

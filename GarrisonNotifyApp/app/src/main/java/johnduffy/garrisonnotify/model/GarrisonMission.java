@@ -1,5 +1,4 @@
-package com.duffy.model;
-
+package johnduffy.garrisonnotify.model;
 import java.util.Map;
 
 /**
@@ -10,10 +9,9 @@ public class GarrisonMission {
     public long endTime;
     public Map<String, Reward> rewards;
 
-    public static class Reward{
+    public static class Reward {
         public String itemID;
-        public Integer quantity;
-        public Integer followerXP;
+        public int quantity;
         public String title;
         public String icon;
         public String imageUrl;
