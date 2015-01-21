@@ -5,6 +5,8 @@ import com.duffy.model.BlizzardApiItem;
 import com.duffy.model.GarrisonMission;
 import com.duffy.model.InProgressMissionData;
 import com.duffy.model.push.InProgressMissionDataPushRequest;
+import com.duffy.model.push.PushRegIdResponse;
+import com.duffy.model.push.PushRequest;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
@@ -36,6 +38,8 @@ public class Main {
 
     private static Client client = ClientBuilder.newClient();
 
+    private static String pushToken;
+
     static {
         JacksonJsonProvider provider = new JacksonJsonProvider();
         provider.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -49,24 +53,18 @@ public class Main {
 
         //grabMissionData();
 
-//        // get the directory we want to watch, using the Paths singleton class
-//        Path toWatch = Paths.get(getAccountPath().toURI());
-//        if (toWatch == null) {
-//            throw new UnsupportedOperationException("Directory not found");
-//        }
-//
-//        // make a new watch service that we can register interest in
-//        // directories and files with.
-//        WatchService myWatcher = toWatch.getFileSystem().newWatchService();
-//
-//        // start the file watcher thread below
-//        MyWatchQueueReader fileWatcher = new MyWatchQueueReader(myWatcher);
-//        Thread th = new Thread(fileWatcher, "FileWatcher");
-//        th.start();
-//
-//        // register a file
-//        toWatch.register(myWatcher, ENTRY_CREATE, ENTRY_MODIFY);
-//        th.join();
+        if(args.length < 1)
+            System.exit(0);
+
+        System.out.println(args[0]);
+
+        pushToken = client
+                .target("http://gnpushserver-jayd.rhcloud.com/app/push/" + args[0])
+                .request(MediaType.APPLICATION_JSON_TYPE)
+                .get(PushRegIdResponse.class)
+                .pushId;
+
+        System.out.println(pushToken);
 
         List<Thread> watcherThreads = new ArrayList<>();
 
@@ -170,7 +168,7 @@ public class Main {
     }
 
     private static void push(List<Account> accounts) {
-        InProgressMissionDataPushRequest pushRequest = new InProgressMissionDataPushRequest(accounts, "APA91bGIQ2SrCkgRbkkQdwn3xjK6X3He2T-G7gI7e0ByrdNAvuGRBvZ_fLiy0Yqc_bmXRgK-ma2YOlX_sM43iqTSuonveDJaKKwI7deHMC2ofRvCN8lwOy-sfAp69jhwT39j80VWz6bTPmkgk676CY1fPynrgr04s84jJD7_HlgeQ1U402VLjrE");
+        InProgressMissionDataPushRequest pushRequest = new InProgressMissionDataPushRequest(accounts, pushToken);
 
 
         Response response = client.target("https://android.googleapis.com/gcm/send")
