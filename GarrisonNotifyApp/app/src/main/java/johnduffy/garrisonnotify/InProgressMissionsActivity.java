@@ -81,9 +81,15 @@ public class InProgressMissionsActivity extends Activity {
                 final NetworkImageView rewardImage = (NetworkImageView) v.findViewById(R.id.rewardImg);
                 for (GarrisonMission.Reward reward : mission.rewards.values()) {
                     if (reward.quantity > 1) {
-                        ((TextView) v.findViewById(R.id.quantity)).setText(String.valueOf(reward.quantity));
+                        String s = String.valueOf(reward.quantity);
+                        if(reward.quantity > 1000){
+                            s = String.format("%.1fk", reward.quantity/1000.0d);
+                        }
+                        ((TextView) v.findViewById(R.id.quantity)).setText(s);
                     }
-                    if (reward.imageUrl != null) {
+                    if("Interface\\Icons\\XPBonus_Icon".equals(reward.icon)) {
+                        rewardImage.setDefaultImageResId(R.drawable.bonus_xp);
+                    } else if (reward.imageUrl != null) {
                         rewardImage.setImageUrl(reward.imageUrl, ((GarrisonNotifyApplication) getApplication()).VOLLEY_IMAGE_LOADER);
                     }
                     if (reward.itemID != null) {

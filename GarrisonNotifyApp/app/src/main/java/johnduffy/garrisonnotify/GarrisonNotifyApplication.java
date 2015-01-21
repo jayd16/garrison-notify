@@ -16,11 +16,12 @@ import java.io.File;
  */
 public class GarrisonNotifyApplication extends Application {
     public static ImageLoader VOLLEY_IMAGE_LOADER;
-    public static RequestQueue VOLLEY_IMAGE_REQUEST_QUEUE;
+    public static RequestQueue VOLLEY_REQUEST_QUEUE;
 
     @Override
     public void onCreate() {
         super.onCreate();
+        VOLLEY_REQUEST_QUEUE = Volley.newRequestQueue(this);
         VOLLEY_IMAGE_LOADER = new ImageLoader(Volley.newRequestQueue(this), new SimpleImageCache());
     }
 

@@ -25,6 +25,8 @@
         android:layout_width="60dp"
         android:background="@drawable/item_border"
         android:layout_height="60dp"
+        android:scaleType="centerCrop"
+        android:src="@drawable/bonus_xp"
         android:layout_below="@id/name" />
 
     <TextView

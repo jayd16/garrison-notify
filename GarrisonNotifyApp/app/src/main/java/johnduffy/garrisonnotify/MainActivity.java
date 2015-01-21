@@ -11,6 +11,10 @@ import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.widget.TextView;
 
+import com.android.volley.NetworkResponse;
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
@@ -209,7 +213,29 @@ public class MainActivity extends ActionBarActivity {
      * using the 'from' address in the message.
      */
     private void sendRegistrationIdToBackend() {
-        // Your implementation here.
+        Request<Void> registerPushIdReq = new Request<Void>(
+                Request.Method.POST,
+                "http://gnpushserver-jayd.rhcloud.com/app/push/jayd/" + regid,
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError volleyError) {
+
+                    }
+                }
+        ) {
+            @Override
+            protected Response<Void> parseNetworkResponse(NetworkResponse networkResponse) {
+                return null;
+            }
+
+            @Override
+            protected void deliverResponse(Void aVoid) {
+
+            }
+        };
+
+
+        GarrisonNotifyApplication.VOLLEY_REQUEST_QUEUE.add(registerPushIdReq);
     }
 
     /**
