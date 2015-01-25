@@ -47,11 +47,8 @@ public class Main {
     }
 
     public static void main(String[] args) throws IOException, InterruptedException {
-        System.out.println("Hello World!");
 
         SystemTrayUtil.showSystemTray();
-
-        //grabMissionData();
 
         if(args.length < 1)
             System.exit(0);
@@ -74,6 +71,9 @@ public class Main {
                 watcherThreads.add(addWatcherToDirectories(savedVars));
             }
         }
+
+
+        //grabMissionData();
 
         for(Thread t : watcherThreads){
             t.join();
@@ -135,7 +135,8 @@ public class Main {
                     .replace("]", "")
                     .replace("=", ":")
                     .replaceAll("\r|\n|\t", "")
-                    .replace(",}", "}");
+                    .replace(",}", "}")
+                    .replaceAll("nil", "null");
             System.out.println(s);
             Gson gson = new Gson();
             InProgressMissionData missionData = gson.fromJson(s, InProgressMissionData.class);
@@ -147,6 +148,7 @@ public class Main {
     }
 
     private static void preProcessRewards(InProgressMissionData missionData) {
+        if(missionData == null) return;
         for (GarrisonMission m : missionData.values()) {
             for (GarrisonMission.Reward reward : m.rewards.values()) {
 
