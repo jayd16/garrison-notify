@@ -39,6 +39,7 @@ public class Main {
     private static Client client = ClientBuilder.newClient();
 
     private static String pushToken;
+    private static String userId;
 
     static {
         JacksonJsonProvider provider = new JacksonJsonProvider();
@@ -55,11 +56,8 @@ public class Main {
 
         System.out.println(args[0]);
 
-        pushToken = client
-                .target("http://gnpushserver-jayd.rhcloud.com/app/push/" + args[0])
-                .request(MediaType.APPLICATION_JSON_TYPE)
-                .get(PushRegIdResponse.class)
-                .pushId;
+        userId = args[0];
+        updatePushToken();
 
         System.out.println(pushToken);
 
@@ -79,6 +77,16 @@ public class Main {
             t.join();
         }
 
+    }
+
+    private static void updatePushToken(){
+        if(userId != null) {
+            pushToken = client
+                    .target("http://gnpushserver-jayd.rhcloud.com/app/push/" + userId)
+                    .request(MediaType.APPLICATION_JSON_TYPE)
+                    .get(PushRegIdResponse.class)
+                    .pushId;
+        }
     }
 
     private static Thread addWatcherToDirectories(File file) throws IOException{
@@ -180,7 +188,11 @@ public class Main {
 
         System.out.println("push response: " + response.getStatus());
         try {
-            System.out.println("push response: " + IOUtils.toString((InputStream) response.getEntity()));
+            String responseString =  IOUtils.toString((InputStream) response.getEntity());
+            System.out.println("push response: " + responseString);
+            if(responseString.contains("\"failure\":1")){
+                updatePushToken();
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
