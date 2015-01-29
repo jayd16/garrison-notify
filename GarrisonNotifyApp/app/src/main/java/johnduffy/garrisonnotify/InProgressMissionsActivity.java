@@ -82,7 +82,7 @@ public class InProgressMissionsActivity extends Activity {
                 for (GarrisonMission.Reward reward : mission.rewards.values()) {
                     if (reward.quantity > 1) {
                         String s = String.valueOf(reward.quantity);
-                        if(reward.quantity > 1000){
+                        if(reward.quantity >= 1000){
                             s = String.format("%.1fk", reward.quantity/1000.0d);
                         }
                         ((TextView) v.findViewById(R.id.quantity)).setText(s);

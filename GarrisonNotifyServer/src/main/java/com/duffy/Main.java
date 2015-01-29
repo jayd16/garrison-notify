@@ -159,7 +159,11 @@ public class Main {
         if(missionData == null) return;
         for (GarrisonMission m : missionData.values()) {
             for (GarrisonMission.Reward reward : m.rewards.values()) {
-
+                //if gold reward
+                if(reward.currencyID == 0){
+                    //adjust to gold
+                    reward.quantity /= 10000;
+                }
                 if(reward.followerXP != null){
                     reward.quantity = reward.followerXP;
                 }

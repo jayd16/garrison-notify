@@ -12,6 +12,7 @@ public class GarrisonMission {
 
     public static class Reward{
         public String itemID;
+        public int currencyID = -1;
         public Integer quantity;
         public Integer followerXP;
         public String title;
