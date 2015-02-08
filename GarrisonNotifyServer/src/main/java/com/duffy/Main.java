@@ -24,6 +24,8 @@ import javax.ws.rs.core.Response;
 import java.io.*;
 import java.nio.file.*;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 import static java.nio.file.StandardWatchEventKinds.ENTRY_CREATE;
@@ -112,11 +114,27 @@ public class Main {
 
 
     private static File getAccountPath() {
-        return new File(BASE_WOW_PATH, "/WTF/Account/JAYD1616/Silvermoon/");
+        return new File(BASE_WOW_PATH, "/WTF/Account/JAYD1616");
     }
 
-    private static File[] getCharacterPaths() {
-        return getAccountPath().listFiles();
+    private static File[] getServerPaths() {
+        File[] filesInAccountPath = getAccountPath().listFiles();
+        List<File> dirs = new ArrayList<>();
+        for(File f : filesInAccountPath){
+            if(f.isDirectory()){
+                dirs.add(f);
+            }
+        }
+        return dirs.toArray(new File[dirs.size()]);
+    }
+
+
+    private static List<File> getCharacterPaths() {
+        List<File> files = new ArrayList<>();
+        for(File dir : getServerPaths()){
+            Collections.addAll(files, dir.listFiles());
+        }
+        return files;
     }
 
     private static void grabMissionData() throws IOException {
