@@ -7,6 +7,7 @@ import com.duffy.model.InProgressMissionData;
 import com.duffy.model.push.InProgressMissionDataPushRequest;
 import com.duffy.model.push.PushRegIdResponse;
 import com.duffy.model.push.PushRequest;
+import com.duffy.model.push.ReadFromServerPushRequest;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
@@ -202,11 +203,16 @@ public class Main {
     private static void push(List<Account> accounts) {
         InProgressMissionDataPushRequest pushRequest = new InProgressMissionDataPushRequest(accounts, pushToken);
 
+        Response response = client.target("http://gnpushserver-jayd.rhcloud.com/app/missions/" + userId)
+                .request()
+                .post(Entity.entity(pushRequest, MediaType.APPLICATION_JSON));
 
-        Response response = client.target("https://android.googleapis.com/gcm/send")
+        System.out.println("gnserver response: " + response.getStatus());
+
+        response = client.target("https://android.googleapis.com/gcm/send")
                 .request()
                 .header("Authorization", "key=AIzaSyDE2DwkQmxljaDTSsbq_NYMCQaNj1_lx6E")
-                .post(Entity.entity(pushRequest, MediaType.APPLICATION_JSON));
+                .post(Entity.entity(new ReadFromServerPushRequest(), MediaType.APPLICATION_JSON));
 
         System.out.println("push response: " + response.getStatus());
         try {
