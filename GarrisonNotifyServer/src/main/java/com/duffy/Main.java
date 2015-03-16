@@ -201,18 +201,16 @@ public class Main {
     }
 
     private static void push(List<Account> accounts) {
-        InProgressMissionDataPushRequest pushRequest = new InProgressMissionDataPushRequest(accounts, pushToken);
-
         Response response = client.target("http://gnpushserver-jayd.rhcloud.com/app/missions/" + userId)
                 .request()
-                .post(Entity.entity(pushRequest, MediaType.APPLICATION_JSON));
+                .post(Entity.entity(accounts, MediaType.APPLICATION_JSON));
 
         System.out.println("gnserver response: " + response.getStatus());
 
         response = client.target("https://android.googleapis.com/gcm/send")
                 .request()
                 .header("Authorization", "key=AIzaSyDE2DwkQmxljaDTSsbq_NYMCQaNj1_lx6E")
-                .post(Entity.entity(new ReadFromServerPushRequest(), MediaType.APPLICATION_JSON));
+                .post(Entity.entity(new ReadFromServerPushRequest(pushToken), MediaType.APPLICATION_JSON));
 
         System.out.println("push response: " + response.getStatus());
         try {

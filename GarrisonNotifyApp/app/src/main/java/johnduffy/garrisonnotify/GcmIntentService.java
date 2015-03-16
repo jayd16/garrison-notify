@@ -94,6 +94,10 @@ public class GcmIntentService extends IntentService {
         mNotificationManager.notify(NOTIFICATION_ID, mBuilder.build());
     }
 
+    private void handlePush(Bundle notifExtras) {
+        MissionUpdates.sendBroadcast(this);
+    }
+
     private void parseAndStoreMission(Bundle notifExtras) {
         String data = notifExtras.getString("data");
         MissionUtil.setMissions(this, data);
