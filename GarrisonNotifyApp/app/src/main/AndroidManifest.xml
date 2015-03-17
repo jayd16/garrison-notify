@@ -6,6 +6,7 @@
     <uses-permission android:name="android.permission.GET_ACCOUNTS" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
+    <uses-permission android:name="android.permission.VIBRATE" />
 
     <permission
         android:name="johnduffy.garrisonnotify.permission.C2D_MESSAGE"
@@ -31,7 +32,9 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".InProgressMissionsActivity"/>
+        <activity
+            android:launchMode="singleTask"
+            android:name=".InProgressMissionsActivity"/>
 
         <receiver
             android:name=".GcmBroadcastReceiver"
@@ -42,6 +45,13 @@
             </intent-filter>
         </receiver>
         <service android:name=".GcmIntentService" />
+
+        <receiver android:name=".alarm.MissionCompleteReceiver">
+            <intent-filter>
+                <action android:name="com.garrisonnotify.MISSION_COMPLETE" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </receiver>
 
     </application>
 

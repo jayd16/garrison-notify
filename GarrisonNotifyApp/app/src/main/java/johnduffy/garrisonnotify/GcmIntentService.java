@@ -58,11 +58,11 @@ public class GcmIntentService extends IntentService {
             } else if (GoogleCloudMessaging.
                     MESSAGE_TYPE_MESSAGE.equals(messageType)) {
                 Log.i(TAG, "Completed work @ " + SystemClock.elapsedRealtime());
-                // Post notification of received message.
-                sendNotification("Received: " + extras.toString());
-                Log.i(TAG, "Received: " + extras.toString());
+//                // Post notification of received message.
+//                sendNotification("Received: " + extras.toString());
+//                Log.i(TAG, "Received: " + extras.toString());
 
-                parseAndStoreMission(extras);
+                handlePush(extras);
 
             }
         }

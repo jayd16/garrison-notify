@@ -27,6 +27,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import johnduffy.garrisonnotify.alarm.CompletionNotificationManager;
+import johnduffy.garrisonnotify.alarm.MissionCompleteReceiver;
 import johnduffy.garrisonnotify.event.MissionUpdates;
 import johnduffy.garrisonnotify.model.Account;
 import johnduffy.garrisonnotify.model.GarrisonMission;
@@ -121,6 +123,8 @@ public class InProgressMissionsActivity extends Activity {
     }
 
     private void updateUI() {
+        CompletionNotificationManager.setAlarmForNextMission(getApplicationContext(), data);
+
         updateOnTick.clear();
         list.removeAllViews();
         for (Account account : data) {
